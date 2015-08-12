@@ -7,7 +7,7 @@ namespace Codenet.Dojo.Services.Tests
     public class DojoServiceTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void HappyTest()
         {
         }
     }
