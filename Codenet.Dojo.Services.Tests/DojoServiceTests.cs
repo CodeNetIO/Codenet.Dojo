@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Codenet.Dojo.Compilers;
 
 namespace Codenet.Dojo.Services.Tests
 {
@@ -38,7 +39,7 @@ namespace Codenet.Dojo.Services.Tests
         public void ProcessSimple_StaticMethod()
         {
             return;
-            var service = new DojoService();
+            var service = new DojoService(new StringCompiler());
             Assert.AreEqual("Success", service.ProcessSimple(SIMPLE_STATIC_METHOD, SIMPLE_STATIC_METHOD_TEST));
         }
     }

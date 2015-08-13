@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codenet.Dojo.Contracts", "C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codenet.Dojo.Services.Tests", "Codenet.Dojo.Services.Tests\Codenet.Dojo.Services.Tests.csproj", "{2ED77670-6355-48A6-99F0-597B48888EA8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codenet.Dojo.Compilers", "Codenet.Dojo.Compilers\Codenet.Dojo.Compilers.csproj", "{B1C40269-4D0D-4F1A-A9A0-2247B49FC0C4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{2ED77670-6355-48A6-99F0-597B48888EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2ED77670-6355-48A6-99F0-597B48888EA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2ED77670-6355-48A6-99F0-597B48888EA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1C40269-4D0D-4F1A-A9A0-2247B49FC0C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1C40269-4D0D-4F1A-A9A0-2247B49FC0C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1C40269-4D0D-4F1A-A9A0-2247B49FC0C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1C40269-4D0D-4F1A-A9A0-2247B49FC0C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

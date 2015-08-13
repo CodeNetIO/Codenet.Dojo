@@ -54,6 +54,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Codenet.Dojo.Compilers\Codenet.Dojo.Compilers.csproj">
+      <Project>{b1c40269-4d0d-4f1a-a9a0-2247b49fc0c4}</Project>
+      <Name>Codenet.Dojo.Compilers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Codenet.Dojo.Contracts\Codenet.Dojo.Contracts.csproj">
       <Project>{29b773fa-c81f-4960-b201-707e0a0c18c8}</Project>
       <Name>Codenet.Dojo.Contracts</Name>
