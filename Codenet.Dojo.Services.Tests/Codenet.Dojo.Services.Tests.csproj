@@ -53,6 +53,16 @@
     <Compile Include="DojoServiceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Codenet.Dojo.Contracts\Codenet.Dojo.Contracts.csproj">
+      <Project>{29b773fa-c81f-4960-b201-707e0a0c18c8}</Project>
+      <Name>Codenet.Dojo.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Codenet.Dojo.Services\Codenet.Dojo.Services.csproj">
+      <Project>{9a786d44-bc33-4cef-a031-2d597297fcc7}</Project>
+      <Name>Codenet.Dojo.Services</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
