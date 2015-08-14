@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Codenet.Dojo.Compilers.Tests
@@ -7,7 +9,9 @@ namespace Codenet.Dojo.Compilers.Tests
     [TestClass]
     public class StringCompilerTests
     {
-        #region Objects
+        #region Compilation Objects
+
+        #region SIMPLE_STATIC_METHOD
         private const string SIMPLE_STATIC_METHOD = @"
             using System;
 
@@ -19,7 +23,9 @@ namespace Codenet.Dojo.Compilers.Tests
                 }
             }
             ";
+        #endregion
 
+        #region SIMPLE_NONSTATIC_METHOD
         private const string SIMPLE_NONSTATIC_METHOD = @"
             using System;
 
@@ -43,10 +49,30 @@ namespace Codenet.Dojo.Compilers.Tests
                 }
             }
             ";
+
+        #endregion
+
+        #region SIMPLE_STATIC_METHOD_TEST
+        private const string SIMPLE_STATIC_METHOD_TEST = @"
+            using System;
+            using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+            [TestClass]
+            public class SimpleStaticTests
+            {
+                [TestMethod]
+                public void SimpleStatic_GetAString()
+                {
+                    Assert.AreEqual(""A String"", SimpleStatic.GetAString());
+                }
+            }
+            ";
+        #endregion
+
         #endregion
 
         [TestMethod]
-        public void StringCompiler_SimpleStaticMethod()
+        public void SimpleStaticMethod()
         {
             // Create assembly
             var stringCompiler = new StringCompiler();
@@ -65,7 +91,7 @@ namespace Codenet.Dojo.Compilers.Tests
         }
 
         [TestMethod]
-        public void StringCompiler_SimpleNonStaticMethod()
+        public void SimpleNonStaticMethod()
         {
             // Create assembly
             var stringCompiler = new StringCompiler();
@@ -92,6 +118,34 @@ namespace Codenet.Dojo.Compilers.Tests
             var parameterStringMethod = exportedType.GetMethods().FirstOrDefault(m => m.Name == "GetAString" && m.GetParameters().Count() == 1);
             Assert.IsNotNull(parameterStringMethod);
             Assert.AreEqual("Injected String!", parameterStringMethod.Invoke(instance, new object[] {"Injected String!"}));
+        }
+
+        
+        public void SimpleStaticMethodUnitTest()
+        {
+            // Create class assembly
+            var stringCompiler = new StringCompiler();
+            var classAssembly = stringCompiler.Compile(SIMPLE_STATIC_METHOD);
+            Assert.IsNotNull(classAssembly);
+
+            // Create test assembly
+            var assemblies = new List<Assembly>()
+            {
+                classAssembly
+            };
+            
+            var testAssembly = stringCompiler.Compile(SIMPLE_STATIC_METHOD_TEST, assemblies);
+            Assert.IsNotNull(testAssembly);
+
+            // Verify that the class exists
+            var exportedType = testAssembly.ExportedTypes.FirstOrDefault();
+            Assert.IsNotNull(exportedType);
+            Assert.AreEqual("SimpleStaticTests", exportedType.Name);
+
+            // Verify that the method exists & returns the appropriate response
+            //var getAStringMethod = exportedType.GetMethod("SimpleStatic_GetAString");
+            //Assert.IsNotNull(getAStringMethod);
+            //Assert.AreEqual("A String", getAStringMethod.Invoke(null, null));
         }
     }
 }

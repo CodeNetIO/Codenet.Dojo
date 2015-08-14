@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace Codenet.Dojo.Compilers
@@ -12,6 +13,10 @@ namespace Codenet.Dojo.Compilers
     public class StringCompiler : IStringCompiler
     {
         public Assembly Compile(string code)
+        {
+            return Compile(code, default(IEnumerable<Assembly>));
+        }
+        public Assembly Compile(string code, IEnumerable<Assembly> assemblyReferences)
         {
             // Get the file path of object, since that's where the other .NET DLLs are
             // Should be something like c:\windows\microsoft.net\frameworks\v4.0....
@@ -24,11 +29,27 @@ namespace Codenet.Dojo.Compilers
             string assemblyName = Path.GetRandomFileName();
 
             // Where should we look when a referenced assembly isn't loaded
-            MetadataReference[] references = new MetadataReference[]
+            var references = new List<MetadataReference>()
             {
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location)
+                MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute).Assembly.Location)
             };
+
+            // Add in the passed-in references
+            if (assemblyReferences != null)
+            {
+                foreach (var assembly in assemblyReferences)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        var formatter = new BinaryFormatter();
+                        formatter.Serialize(stream, assembly);
+                        references.Add(MetadataReference.CreateFromImage(stream.ToArray()));
+                    }
+                }
+
+            }
 
             // Create a compilation object to compile the code and make this a DLL.
             CSharpCompilation compilation = CSharpCompilation.Create(
