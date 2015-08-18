@@ -12,11 +12,25 @@ namespace Codenet.Dojo.Compilers
 {
     public class StringCompiler : IStringCompiler
     {
+
         public Assembly Compile(string code)
         {
-            return Compile(code, default(IEnumerable<Assembly>));
+            return Compile(code, default(IEnumerable<byte[]>));
         }
-        public Assembly Compile(string code, IEnumerable<Assembly> assemblyReferences)
+
+        public Assembly Compile(string code, IEnumerable<byte[]> memoryStreamReferences)
+        {
+            var bytes = CompileToByteArray(code, memoryStreamReferences);
+            // Compiled successfully!  Create and return the assembly.
+            return Assembly.Load(bytes);
+        }
+
+        public byte[] CompileToByteArray(string code)
+        {
+            return CompileToByteArray(code, default(IEnumerable<byte[]>));
+        }
+
+        public byte[] CompileToByteArray(string code, IEnumerable<byte[]> memoryStreamReferences)
         {
             // Get the file path of object, since that's where the other .NET DLLs are
             // Should be something like c:\windows\microsoft.net\frameworks\v4.0....
@@ -37,16 +51,11 @@ namespace Codenet.Dojo.Compilers
             };
 
             // Add in the passed-in references
-            if (assemblyReferences != null)
+            if (memoryStreamReferences != null)
             {
-                foreach (var assembly in assemblyReferences)
+                foreach (var ms in memoryStreamReferences)
                 {
-                    using (var stream = new MemoryStream())
-                    {
-                        var formatter = new BinaryFormatter();
-                        formatter.Serialize(stream, assembly);
-                        references.Add(MetadataReference.CreateFromImage(stream.ToArray()));
-                    }
+                    references.Add(MetadataReference.CreateFromImage(ms.ToArray()));
                 }
 
             }
@@ -81,9 +90,8 @@ namespace Codenet.Dojo.Compilers
                 }
                 else
                 {
-                    // Compiled successfully!  Create and return the assembly.
                     ms.Seek(0, SeekOrigin.Begin);
-                    return Assembly.Load(ms.ToArray());
+                    return ms.ToArray();
                 }
             }
         }

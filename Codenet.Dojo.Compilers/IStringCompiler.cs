@@ -28,6 +28,9 @@ namespace Codenet.Dojo.Compilers
         /// Code could not be compiled.
         /// </exception>
         /// <returns>An assembly of the code string.</returns>
-        Assembly Compile(string code, IEnumerable<Assembly> assemblyReferences);
+        Assembly Compile(string code, IEnumerable<byte[]> memoryStreamReferences);
+
+        byte[] CompileToByteArray(string code);
+        byte[] CompileToByteArray(string code, IEnumerable<byte[]> memoryStreamReferences);
     }
 }

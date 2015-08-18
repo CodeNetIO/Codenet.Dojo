@@ -9,6 +9,10 @@ namespace Codenet.Dojo.Compilers.Tests
     [TestClass]
     public class StringCompilerTests
     {
+        #region Fields
+        private Dictionary<string, Assembly> _assemblies;
+        #endregion
+
         #region Compilation Objects
 
         #region SIMPLE_STATIC_METHOD
@@ -20,6 +24,20 @@ namespace Codenet.Dojo.Compilers.Tests
                 public static string GetAString()
                 {
                     return ""A String"";
+                }
+            }
+            ";
+        #endregion
+
+        #region SIMPLE_STATIC_FAILURE_METHOD
+        private const string SIMPLE_STATIC_FAILURE_METHOD = @"
+            using System;
+
+            public static class SimpleStatic
+            {
+                public static string GetAString()
+                {
+                    return ""A Failure"";
                 }
             }
             ";
@@ -71,6 +89,13 @@ namespace Codenet.Dojo.Compilers.Tests
 
         #endregion
 
+        #region Constructors
+        public StringCompilerTests()
+        {
+            _assemblies = new Dictionary<string, Assembly>();
+        }
+        #endregion
+
         [TestMethod]
         public void SimpleStaticMethod()
         {
@@ -120,21 +145,19 @@ namespace Codenet.Dojo.Compilers.Tests
             Assert.AreEqual("Injected String!", parameterStringMethod.Invoke(instance, new object[] {"Injected String!"}));
         }
 
-        
+        [TestMethod]
         public void SimpleStaticMethodUnitTest()
         {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
             // Create class assembly
             var stringCompiler = new StringCompiler();
-            var classAssembly = stringCompiler.Compile(SIMPLE_STATIC_METHOD);
-            Assert.IsNotNull(classAssembly);
+            var bytes = stringCompiler.CompileToByteArray(SIMPLE_STATIC_METHOD);
+            Assert.IsNotNull(bytes);
 
-            // Create test assembly
-            var assemblies = new List<Assembly>()
-            {
-                classAssembly
-            };
-            
-            var testAssembly = stringCompiler.Compile(SIMPLE_STATIC_METHOD_TEST, assemblies);
+            var codeAssembly = Assembly.Load(bytes);
+            _assemblies[codeAssembly.FullName] = codeAssembly;
+
+            var testAssembly = stringCompiler.Compile(SIMPLE_STATIC_METHOD_TEST, new [] { bytes });
             Assert.IsNotNull(testAssembly);
 
             // Verify that the class exists
@@ -142,10 +165,68 @@ namespace Codenet.Dojo.Compilers.Tests
             Assert.IsNotNull(exportedType);
             Assert.AreEqual("SimpleStaticTests", exportedType.Name);
 
+            // Get the contructor info and call it
+            var constructor = exportedType.GetConstructors().FirstOrDefault();
+            Assert.IsNotNull(constructor);
+            var instance = constructor.Invoke(new object[] {});
+            Assert.IsNotNull(instance);
+
             // Verify that the method exists & returns the appropriate response
-            //var getAStringMethod = exportedType.GetMethod("SimpleStatic_GetAString");
-            //Assert.IsNotNull(getAStringMethod);
-            //Assert.AreEqual("A String", getAStringMethod.Invoke(null, null));
+            var getAStringMethod = exportedType.GetMethod("SimpleStatic_GetAString");
+            Assert.IsNotNull(getAStringMethod);
+            getAStringMethod.Invoke(instance, null);
         }
+
+        [TestMethod]
+        public void SimpleStaticFailureMethod()
+        {
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+            // Create class assembly
+            var stringCompiler = new StringCompiler();
+            var bytes = stringCompiler.CompileToByteArray(SIMPLE_STATIC_FAILURE_METHOD);
+            Assert.IsNotNull(bytes);
+
+            var codeAssembly = Assembly.Load(bytes);
+            _assemblies[codeAssembly.FullName] = codeAssembly;
+
+            var testAssembly = stringCompiler.Compile(SIMPLE_STATIC_METHOD_TEST, new[] { bytes });
+            Assert.IsNotNull(testAssembly);
+
+            // Verify that the class exists
+            var exportedType = testAssembly.ExportedTypes.FirstOrDefault();
+            Assert.IsNotNull(exportedType);
+            Assert.AreEqual("SimpleStaticTests", exportedType.Name);
+
+            // Get the contructor info and call it
+            var constructor = exportedType.GetConstructors().FirstOrDefault();
+            Assert.IsNotNull(constructor);
+            var instance = constructor.Invoke(new object[] { });
+            Assert.IsNotNull(instance);
+
+            // Verify that the method exists & returns the appropriate response
+            var getAStringMethod = exportedType.GetMethod("SimpleStatic_GetAString");
+            Assert.IsNotNull(getAStringMethod);
+            try
+            {
+                getAStringMethod.Invoke(instance, null);
+            }
+            catch(Exception ex)
+            {
+                while (ex.InnerException != null)
+                {
+                    ex = ex.InnerException;
+                }
+                Assert.AreEqual("Assert.AreEqual failed. Expected:<A String>. Actual:<A Failure>. ", ex.Message);
+            }
+        }
+
+        #region Event Handlers
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            Assembly result;
+            _assemblies.TryGetValue(args.Name, out result);
+            return result;
+        }
+        #endregion
     }
 }
