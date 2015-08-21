@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Codenet.Dojo.Compilers.Exceptions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -75,18 +76,18 @@ namespace Codenet.Dojo.Compilers
                 if (!result.Success)
                 {
                     // Had compile errors
-                    var sb = new StringBuilder();
+                    var errors = new List<CompilationError>();
                     IEnumerable<Diagnostic> failures = result.Diagnostics.Where(diagnostic =>
                         diagnostic.IsWarningAsError ||
                         diagnostic.Severity == DiagnosticSeverity.Error);
 
                     foreach (Diagnostic diagnostic in failures)
                     {
-                        sb.AppendFormat("{0}: {1}{2}", diagnostic.Id, diagnostic.GetMessage(), Environment.NewLine);
+                        errors.Add(new CompilationError(diagnostic.Id, diagnostic.GetMessage(), diagnostic.Location.GetMappedLineSpan()));
                     }
 
                     // Return errors through an exception
-                    throw new InvalidDataException(sb.ToString());
+                    throw new CompilationException(errors);
                 }
                 else
                 {

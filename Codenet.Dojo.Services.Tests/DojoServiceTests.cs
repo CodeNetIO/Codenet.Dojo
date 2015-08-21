@@ -1,5 +1,7 @@
 ﻿using Codenet.Dojo.Compilers;
+using Codenet.Dojo.Contracts;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
 namespace Codenet.Dojo.Services.Tests
 {
@@ -49,7 +51,12 @@ namespace Codenet.Dojo.Services.Tests
         public void ProcessSimple_StaticMethod()
         {
             var service = new DojoService(new StringCompiler());
-            Assert.AreEqual("Success", service.ProcessSimple(SIMPLE_STATIC_METHOD, SIMPLE_STATIC_METHOD_TEST));
+            var results = service.ProcessSimple(SIMPLE_STATIC_METHOD, SIMPLE_STATIC_METHOD_TEST).ToList();
+            Assert.AreEqual(1,results.Count);
+            var result = (results[0] as CompilationResult);
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.CompilationSuccessful);
+            Assert.AreEqual("Completed Successfully!", result.Message);
         }
     }
 }

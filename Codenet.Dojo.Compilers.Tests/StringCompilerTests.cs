@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Codenet.Dojo.Compilers.Exceptions;
 
 namespace Codenet.Dojo.Compilers.Tests
 {
@@ -82,6 +83,20 @@ namespace Codenet.Dojo.Compilers.Tests
                 public void SimpleStatic_GetAString()
                 {
                     Assert.AreEqual(""A String"", SimpleStatic.GetAString());
+                }
+            }
+            ";
+        #endregion
+
+        #region SIMPLE_STATIC_COMPILATION_ERROR_METHOD
+        private const string SIMPLE_STATIC_COMPILATION_ERROR_METHOD = @"
+            using System;
+
+            public static class SimpleStatic
+            {
+                public static string GetAString()
+                {
+                    return 5;
                 }
             }
             ";
@@ -218,6 +233,70 @@ namespace Codenet.Dojo.Compilers.Tests
                 }
                 Assert.AreEqual("Assert.AreEqual failed. Expected:<A String>. Actual:<A Failure>. ", ex.Message);
             }
+        }
+
+        [TestMethod]
+        public void SimpleStaticCompilationErrorMethod()
+        {
+            // Create class assembly
+            var stringCompiler = new StringCompiler();
+
+            try
+            {
+                var bytes = stringCompiler.CompileToByteArray(SIMPLE_STATIC_COMPILATION_ERROR_METHOD);
+            }
+            catch(CompilationException ex)
+            {
+                Assert.AreEqual(1, ex.Errors.Count());
+                var error = ex.Errors.First();
+                Assert.AreEqual("CS0029", error.Id);
+                Assert.AreEqual("Cannot implicitly convert type 'int' to 'string'", error.Message);
+                Assert.AreEqual(7, error.Location.StartLinePosition.Line);
+                Assert.AreEqual(27, error.Location.StartLinePosition.Character);
+            }
+
+            try
+            {
+                var bytes = stringCompiler.CompileToByteArray(SIMPLE_STATIC_COMPILATION_ERROR_METHOD, default(IEnumerable<byte[]>));
+            }
+            catch (CompilationException ex)
+            {
+                Assert.AreEqual(1, ex.Errors.Count());
+                var error = ex.Errors.First();
+                Assert.AreEqual("CS0029", error.Id);
+                Assert.AreEqual("Cannot implicitly convert type 'int' to 'string'", error.Message);
+                Assert.AreEqual(7, error.Location.StartLinePosition.Line);
+                Assert.AreEqual(27, error.Location.StartLinePosition.Character);
+            }
+
+            try
+            {
+                var assembly = stringCompiler.Compile(SIMPLE_STATIC_COMPILATION_ERROR_METHOD);
+            }
+            catch (CompilationException ex)
+            {
+                Assert.AreEqual(1, ex.Errors.Count());
+                var error = ex.Errors.First();
+                Assert.AreEqual("CS0029", error.Id);
+                Assert.AreEqual("Cannot implicitly convert type 'int' to 'string'", error.Message);
+                Assert.AreEqual(7, error.Location.StartLinePosition.Line);
+                Assert.AreEqual(27, error.Location.StartLinePosition.Character);
+            }
+
+            try
+            {
+                var assembly = stringCompiler.Compile(SIMPLE_STATIC_COMPILATION_ERROR_METHOD, default(IEnumerable<byte[]>));
+            }
+            catch (CompilationException ex)
+            {
+                Assert.AreEqual(1, ex.Errors.Count());
+                var error = ex.Errors.First();
+                Assert.AreEqual("CS0029", error.Id);
+                Assert.AreEqual("Cannot implicitly convert type 'int' to 'string'", error.Message);
+                Assert.AreEqual(7, error.Location.StartLinePosition.Line);
+                Assert.AreEqual(27, error.Location.StartLinePosition.Character);
+            }
+
         }
 
         #region Event Handlers

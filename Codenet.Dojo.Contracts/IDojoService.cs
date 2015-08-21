@@ -11,6 +11,6 @@ namespace Codenet.Dojo.Contracts
     public interface IDojoService
     {
         [OperationContract]
-        string ProcessSimple(string code, string tests);
+        IEnumerable<MessageResult> ProcessSimple(string code, string tests);
     }
 }
