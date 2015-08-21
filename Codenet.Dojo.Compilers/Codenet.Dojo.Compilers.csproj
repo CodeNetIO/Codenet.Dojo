@@ -98,6 +98,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compiler.cs" />
+    <Compile Include="Exceptions\CompilationError.cs" />
+    <Compile Include="Exceptions\CompilationException.cs" />
     <Compile Include="IStringCompiler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
